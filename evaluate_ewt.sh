@@ -4,7 +4,7 @@
 python setup.py install >/dev/null || exit 1
 
 DATA=../UCCA_English-EWT
-OUT=out/eval
+OUT=out/eval/ewt
 mkdir -p ${OUT}/{,all/}{ucca,ud}
 TO_UD="-f conllu --label-map=semstr/util/resources/ucca_ud_label_map.csv"
 TO_UCCA="--extra-normalization --label-map=semstr/util/resources/ud_ucca_label_map.csv"
