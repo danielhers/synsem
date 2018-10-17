@@ -8,7 +8,7 @@ DIR=$PWD
 echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
 [[ -n "$SLURM_ARRAY_TASK_ID" ]] && CORPORA=(${CORPORA[$SLURM_ARRAY_TASK_ID]})
 
-echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
+cd ../tupa-dev
 for d in ${CORPORA[@]}; do
   tupa ${DATA[$d]} -m models/${UCCA_MODEL[$d]} -o $PARSED/xml/${UCCA_MODEL[$d]}/$d
 done

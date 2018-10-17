@@ -1,4 +1,6 @@
-declare -a DATA UCCA_MODEL UCCA_UD_MODEL UD_MODEL UDPIPE_MODEL
+#set +x
+
+declare -A DATA UCCA_MODEL UCCA_UD_MODEL UD_MODEL UDPIPE_MODEL
 CORPORA=(wiki-dev 20k 20k-fr-dev 20k-de-dev)
 PARSED=$PWD/../semstr/parsed
 
