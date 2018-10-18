@@ -10,7 +10,7 @@ from operator import attrgetter
 
 
 def split(s):
-    print(s)
+    # print(s)
     return s.split("\t")
 
 
@@ -22,6 +22,15 @@ UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop
 COLUMNS = pd.Series(list(map("_".join, chain(
     product(["UCCA", "CoNLL-U"], ["primary", "remote"], ["unlabeled", "labeled"], ["precision", "recall", "f1"]),
     product(["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["f1"])))))
+
+
+CORPORA = {
+    "ewt":        (0, "English EWT"),
+    "wiki-dev":   (1, "English Wiki dev"),
+    "20k":        (2, "English 20K"),
+    "20k-fr-dev": (3, "French 20K"),
+    "20k-de-dev": (4, "German 20K"),
+}
 
 
 class Data(namedtuple("Data", ("columns", "report", "scores"))):
@@ -39,7 +48,8 @@ class Report(namedtuple("Report", ("is_ref", "model", "features", "ref", "labele
         m = re.match(r"(.*-\d+)-(.*)", basename)
         path = f.split(os.sep)
         # noinspection PyTypeChecker
-        fields = (bool(m),) + (m.groups() if m else (basename, "")) + (path[-2], "unlabeled" not in f, path[-3], f)
+        fields = (bool(m),) + (m.groups() if m else (basename, "")) + \
+                 (path[-2], "unlabeled" not in f, CORPORA[path[-3]], f)
         return Report(*fields)
 
     def read(self):
@@ -55,7 +65,7 @@ def eval_corpus(corpus, reports):
     key = attrgetter("model", "features")
     data = sorted(r.read() for _, rs in groupby(sorted(reports), key=key) for r in rs)
     print()
-    print(corpus, data[0].column_names())
+    print(*([corpus[1]] + 6 * [""] + strip(sorted(set(c for d in data for c in d.column_names()[6:])))), sep="\t")
     for tup in groupby(data, key=Data.ref):
         eval_ref(*tup)
 
@@ -78,13 +88,17 @@ def eval_model_features(model_features, data):
     if not df.eq(100).all().all():
         columns = df.columns.tolist()
         cs = [c for c in COLUMNS if c in columns]
-        rels = [c.replace("UCCA_", "").replace("CoNLL-U_", "").replace("_labeled_f1", "") for c in cs]
-        expected = UCCA_RELS + UD_RELS
-        assert rels[-len(expected):] == expected, "Missing fine-grained columns in %s %s for relations: %s" % (
-            model, features, ", ".join(r for r in expected if r not in rels) or rels)
+        # rels = strip(cs)
+        # expected = UCCA_RELS + UD_RELS
+        # assert rels[-len(expected):] == expected, "Missing fine-grained columns in %s %s for relations: %s" % (
+        #     model, features, ", ".join(r for r in expected if r not in rels) or rels)
         # noinspection PyTypeChecker
         print("", model, features,
               df[cs].to_csv(header=False, index=False, sep="\t").strip().replace("\n", "\n\t\t\t"), sep="\t")
+
+
+def strip(cs):
+    return [c.replace("UCCA_", "").replace("CoNLL-U_", "").replace("_labeled_f1", "") for c in cs]
 
 
 def main():
