@@ -1,10 +1,10 @@
 #set +x
 
 declare -A DATA UCCA_MODEL UCCA_UD_MODEL UD_MODEL UDPIPE_MODEL UD_DATA
-CORPORA=(wiki-dev 20k 20k-fr-dev 20k-de-dev)
+CORPORA=(ewt wiki-dev 20k 20k-fr-dev 20k-de-dev)
 PARSED=$PWD/../semstr/parsed
 
-DATA[ewt]=../UCCA_English-EWT/v1-sentences-xml
+DATA[ewt]=../converted-udpipe/UCCA_English-EWT
 DATA[wiki-dev]=../shared-task/data/dev-xml/UCCA_English-Wiki
 DATA[20k]=../shared-task/data/test-xml-gold/UCCA_English-20K
 DATA[20k-fr-dev]=../shared-task/data/dev-xml/UCCA_French-20K
