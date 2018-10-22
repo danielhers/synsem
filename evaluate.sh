@@ -9,7 +9,7 @@ echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
 [[ -n "$SLURM_ARRAY_TASK_ID" ]] && CORPORA=(${CORPORA[$SLURM_ARRAY_TASK_ID]})
 
 for d in ${CORPORA[@]}; do
-  OUT=$DIR/../semstr/out/eval/$d
+  OUT=$DIR/eval/$d
   UD_REF_YIELDS=$PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.conllu
   mkdir -p $OUT/{,all/}{ucca,ud}
 
