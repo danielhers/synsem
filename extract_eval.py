@@ -15,9 +15,9 @@ def split(s):
 
 
 UCCA_RELS = split("A	C	D	E	F	G	H	L	N	P	R	S	U")
-UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	"
-                "det	discourse	expl	fixed	flat	iobj	mark	"
-                "nmod	nsubj	nummod	obj	obl	parataxis	punct	root	xcomp")
+UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	csubj"
+                "	det	discourse	expl	fixed	flat	iobj	list	mark	nmod	nsubj	nummod	obj	obl"
+                "	parataxis	punct	root	vocative	xcomp")
 
 COLUMNS = pd.Series(list(map("_".join, chain(
     product(["UCCA", "CoNLL-U"], ["primary", "remote"], ["unlabeled", "labeled"], ["precision", "recall", "f1"]),
@@ -65,7 +65,7 @@ def eval_corpus(corpus, reports):
     key = attrgetter("model", "features")
     data = sorted(r.read() for _, rs in groupby(sorted(reports), key=key) for r in rs)
     print()
-    print(*([corpus[1]] + 6 * [""] + strip(sorted(set(c for d in data for c in d.column_names()[6:])))), sep="\t")
+    print(*([corpus[1]] + 14 * [""] + strip(sorted(set(c for d in data for c in d.column_names()[6:])))), sep="\t")
     for tup in groupby(data, key=Data.ref):
         eval_ref(*tup)
 
