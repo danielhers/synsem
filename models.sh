@@ -28,7 +28,7 @@ UD_MODEL[20k]=en_ewt-20180611
 UD_MODEL[20k-fr-dev]=fr_gsd-20180614
 UD_MODEL[20k-de-dev]=de_gsd-20180611
 
-UDPIPE_MODEL[ewt]=english-ewt-ud-2.2-conll18-180430.udpipe
+UDPIPE_MODEL[ewt]=english-ewt-no-reviews-ud-2.2-181023.udpipe
 UDPIPE_MODEL[wiki-dev]=english-ewt-ud-2.2-conll18-180430.udpipe
 UDPIPE_MODEL[20k]=english-ewt-ud-2.2-conll18-180430.udpipe
 UDPIPE_MODEL[20k-fr-dev]=french-gsd-ud-2.2-conll18-180430.udpipe
