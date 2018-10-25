@@ -17,7 +17,7 @@ for d in ${CORPORA[@]}; do
     REF=${UD_DATA[$d]}
     UD_REF_YIELDS=$REF
     for MODEL in ${UCCA_UD_MODEL[$d]} ${UCCA_MODEL[$d]} ${UDPIPE_MODEL[$d]} ${UD_MODEL[$d]} ucca; do  # Evaluate w.r.t. gold UD
-      GUESSED=$PARSED/conllu/$MODEL/$d
+      GUESSED=$PARSED/conllu/$MODEL/$d.conllu
       [[ -d $GUESSED ]] || GUESSED=$GUESSED.conllu
       if [[ -e $GUESSED ]]; then
         echo $GUESSED $REF
