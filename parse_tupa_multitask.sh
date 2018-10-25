@@ -8,6 +8,7 @@ DIR=$PWD
 echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
 [[ -n "$SLURM_ARRAY_TASK_ID" ]] && CORPORA=(${CORPORA[$SLURM_ARRAY_TASK_ID]})
 
+source activate tupa-dev-cortex
 cd ../tupa-dev
 for d in ${CORPORA[@]}; do
   tupa ${DATA[$d]} -m models/stripped/${UCCA_UD_MODEL[$d]} -o $PARSED/xml/${UCCA_UD_MODEL[$d]}/$d $*
