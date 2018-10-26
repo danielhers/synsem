@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from functools import partial
 
 from semstr.convert import FROM_FORMAT
 from ucca import layer1
@@ -6,10 +7,16 @@ from ucca.evaluation import SummaryStatistics, get_yield
 from ucca.ioutil import get_passages_with_progress_bar
 
 
+FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
+
+
 def conj_spans(passage):
     for node in passage.layer(layer1.LAYER_ID).all:
-        if node.tag == layer1.NodeTags.Foundational and node.connector:
-            yield frozenset(map(get_yield, node.centers))
+        if node.tag:  # UCCA
+            if node.tag == layer1.NodeTags.Foundational and node.connector:
+                yield frozenset(map(get_yield, node.centers))
+        elif any(e.tag.partition(":")[0] == "cc" for e in node):  # UD and there is a coordination
+            yield frozenset([get_yield(node)] + [get_yield(e.child) for e in node if e.tag.partition(":")[0] == "conj"])
 
 
 def count(guessed, ref):
