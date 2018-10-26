@@ -10,24 +10,26 @@ from ucca.ioutil import get_passages_with_progress_bar
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
 
 
-def conj_spans(passage):
+def conjuncts(passage):
     for node in passage.layer(layer1.LAYER_ID).all:
         if node.tag:  # UCCA
             if node.tag == layer1.NodeTags.Foundational and node.connector:
-                yield frozenset(map(get_yield, node.centers))
+                yield node.centers
         elif any(e.tag.partition(":")[0] == "cc" for e in node):  # UD and there is a coordination
-            yield frozenset([get_yield(node)] + [get_yield(e.child) for e in node if e.tag.partition(":")[0] == "conj"])
+            yield [node] + [e.child for e in node if e.tag.partition(":")[0] == "conj"]
+
+
+def yields(nodes):
+    return set(frozenset(map(get_yield, ns)) for ns in nodes)
 
 
 def count(guessed, ref):
-    guessed = set(guessed)
-    ref = set(ref)
     common = guessed & ref
     return SummaryStatistics(len(common), len(guessed) - len(common), len(ref) - len(common))
 
 
 def main(args):
-    guessed, ref = [map(conj_spans, get_passages_with_progress_bar(f, converters=FROM_FORMAT))
+    guessed, ref = [map(yields, map(conjuncts, get_passages_with_progress_bar(f, converters=FROM_FORMAT)))
                     for f in (args.guessed, args.ref)]
     stats = SummaryStatistics.aggregate([count(g, r) for g, r in zip(guessed, ref)])
     stats.print()
