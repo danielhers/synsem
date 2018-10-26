@@ -2,14 +2,14 @@ from argparse import ArgumentParser
 
 from semstr.convert import FROM_FORMAT
 from ucca import layer1
-from ucca.evaluation import SummaryStatistics
+from ucca.evaluation import SummaryStatistics, get_yield
 from ucca.ioutil import get_passages_with_progress_bar
 
 
 def conj_spans(passage):
     for node in passage.layer(layer1.LAYER_ID).all:
         if node.tag == layer1.NodeTags.Foundational and node.connector:
-            yield tuple(sorted(tuple(sorted(t.position for t in c.get_terminals(punct=False))) for c in node.centers))
+            yield frozenset(map(get_yield, node.centers))
 
 
 def count(guessed, ref):
