@@ -15,11 +15,17 @@ def conjuncts(passage):
         if node.tag:  # UCCA
             if node.tag == layer1.NodeTags.Foundational and node.connector:
                 yield node.centers
-        elif any(e.tag.partition(":")[0] == "cc" for e in node):  # UD and there is a coordination
-            yield [node] + [e.child for e in node if e.tag.partition(":")[0] == "conj"]
+        else:  # UD
+            children = [e.child for e in node if e.tag.partition(":")[0] == "conj"]
+            if children:  # UD and there is a coordination
+                # print(node.get_terminals())
+                yield [node] + children
 
 
 def yields(nodes):
+    # nodes = list(nodes)
+    # for ns in nodes:
+    #     print(" | ".join(map(str, ns)))
     return set(frozenset(map(get_yield, ns)) for ns in nodes)
 
 
