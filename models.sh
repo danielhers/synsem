@@ -22,11 +22,11 @@ UCCA_UD_MODEL[20k]=ucca-ud-bilstm-20180917
 UCCA_UD_MODEL[20k-fr-dev]=ucca-ud-fr-bilstm-20180917
 UCCA_UD_MODEL[20k-de-dev]=ucca-ud-de-bilstm-20180917
 
-UD_MODEL[ewt]=en_ewt-20180611
-UD_MODEL[wiki-dev]=en_ewt-20180611
-UD_MODEL[20k]=en_ewt-20180611
-UD_MODEL[20k-fr-dev]=fr_gsd-20180614
-UD_MODEL[20k-de-dev]=de_gsd-20180611
+UD_MODEL[ewt]=en_ewt-20181023
+UD_MODEL[wiki-dev]=en_ewt-20181023
+UD_MODEL[20k]=en_ewt-20181023
+UD_MODEL[20k-fr-dev]=fr_gsd-20181024
+UD_MODEL[20k-de-dev]=de_gsd-20181024
 
 UDPIPE_MODEL[ewt]=english-ewt-no-reviews-ud-2.2-181023.udpipe
 UDPIPE_MODEL[wiki-dev]=english-ewt-ud-2.2-conll18-180430.udpipe
