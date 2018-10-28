@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --mem=10G
 #SBATCH --time=0-3
-#SBATCH --array=0-3
+#SBATCH --array=0-4
 
 DIR=$PWD
 . $DIR/models.sh

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --mem=1G
 #SBATCH --time=0-1
-#SBATCH --array=0-3
+#SBATCH --array=0-4
 
 DIR=$PWD
 . $DIR/models.sh
@@ -22,8 +22,8 @@ for d in ${CORPORA[@]}; do
       if [[ -e $GUESSED ]]; then
         echo $GUESSED $REF
         python -m semstr.evaluate $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -q $*
-        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
-        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
+        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
+        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -c $OUT/ud/$MODEL.ud.counts.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
       fi
     done
   fi
@@ -34,8 +34,8 @@ for d in ${CORPORA[@]}; do
     if [[ -d $GUESSED ]]; then
       echo $GUESSED $REF
       python -m semstr.evaluate $GUESSED $REF --unlabeled -s $OUT/ucca/$MODEL.unlabeled.csv -q $*
-      python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.csv -o $OUT/all/ucca/$MODEL.csv -q $*
-      python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.csv -o $OUT/all/ud/$MODEL.csv --ref-yield-tags=$UD_REF_YIELDS -q $*
+      python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.csv -c $OUT/ucca/$MODEL.counts.csv -o $OUT/all/ucca/$MODEL.csv -q $*
+      python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.csv -c $OUT/ud/$MODEL.counts.csv -o $OUT/all/ud/$MODEL.csv --ref-yield-tags=$UD_REF_YIELDS -q $*
     fi
   done
 done
