@@ -32,8 +32,13 @@ def conjuncts(passage):
                     if ccs:
                         terminals = []
                         for edge in unit:
-                            if edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene) \
-                                    and edge.child.ID not in ccs:
+                            if edge.child.ID in ccs:
+                                if terminals:
+                                    yield terminals
+                                else:
+                                    break
+                                terminals = []
+                            elif edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene):
                                 terminals += get_terminals(edge.child)
                             elif terminals:
                                 yield terminals
