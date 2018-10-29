@@ -13,7 +13,7 @@ FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
 
 def get_terminals(unit, visited=None, conj=False):
     if visited is None:
-        return sorted(get_terminals(unit, visited=set()), key=attrgetter("position"))
+        visited = set()
     outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")
                 and e.tag not in ("punct", layer1.EdgeTags.Punctuation)
                 and (conj or e.tag not in ("cc", "conj"))}
@@ -61,7 +61,7 @@ def evaluate(guessed, ref):
     only_r = r - common
     if only_g or only_r:
         for yields in guessed_yields, ref_yields:
-            conj = [" ".join(str(t) for t in y) for y in yields]
+            conj = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
             print(" | ".join(conj))
     return SummaryStatistics(len(common), len(only_g), len(only_r))
 
