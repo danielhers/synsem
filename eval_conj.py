@@ -2,61 +2,63 @@ from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
 from semstr.convert import FROM_FORMAT
+from spacy.parts_of_speech import CCONJ
 from ucca import layer0, layer1
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages_with_progress_bar
+from ucca.textutil import Attr
 
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
-
-
-def get_terminals(unit, visited=None):
-    if visited is None:
-        return sorted(get_terminals(unit, visited=set()), key=attrgetter("position"))
-    outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")}
-    return ([] if unit.tag and unit.tag != layer0.NodeTags.Word else [unit]) + \
-        [t for e in outgoing for t in get_terminals(e.child, visited | outgoing)]
-
-
-def get_yield(unit):
-    return frozenset(t.position for t in get_terminals(unit))
 
 
 def conjuncts(passage):
     for node in passage.layer(layer1.LAYER_ID).all:
         if node.tag:  # UCCA
-            if node.tag == layer1.NodeTags.Foundational and node.connector:
-                yield node.centers
+            if node.tag == layer1.NodeTags.Foundational:
+                if node.connector:
+                    yield from node.centers
+                elif any(t.position > 1 and t.tok[Attr.POS.value] == CCONJ
+                         for l in node.linkers for t in l.get_terminals()):
+                    yield from node.parallel_scenes
         else:  # UD
-            children = [e.child for e in node if e.tag.partition(":")[0] == "conj"]
+            children = [e.child for e in node if e.tag == "conj"]
             if children:  # UD and there is a coordination
-                print(node.get_terminals())
-                yield [node] + children
+                yield node
+                yield from children
 
 
-def yields(nodes):
-    # nodes = list(nodes)
-    # for ns in nodes:
-    #     conjs = " | ".join(" ".join(str(t) for t in get_terminals(n)) for n in ns)
-    #     print(conjs)
-    return set(frozenset(map(get_yield, ns)) for ns in nodes)
+def get_terminals(unit, visited=None, conj=False):
+    if visited is None:
+        return sorted(get_terminals(unit, visited=set()), key=attrgetter("position"))
+    outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")
+                and e.tag not in ("punct", layer1.EdgeTags.Punctuation)
+                and (conj or e.tag not in ("cc", "conj"))}
+    return ([] if unit.tag and unit.tag != layer0.NodeTags.Word else [unit]) + \
+        [t for e in outgoing for t in get_terminals(e.child, visited | outgoing, conj=True)]
 
 
-def count(guessed, ref):
-    (p1, g), (p2, r) = (guessed, ref)
-    assert p1.ID == p2.ID, "Inconsistent order of passages: %s != %s" % (p1.ID, p2.ID)
+def evaluate(guessed, ref):
+    assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
+    guessed_yields, ref_yields = [[get_terminals(c) for c in conjuncts(p)] for p in (guessed, ref)]
+    g, r = [set(frozenset(t.position for t in y) for y in yields) for yields in (guessed_yields, ref_yields)]
     common = g & r
-    return SummaryStatistics(len(common), len(g) - len(common), len(r) - len(common))
+    only_g = g - common
+    only_r = r - common
+    if only_g or only_r:
+        for yields in guessed_yields, ref_yields:
+            conj = [" ".join(str(t) for t in y) for y in yields]
+            print(" | ".join(conj))
+    return SummaryStatistics(len(common), len(only_g), len(only_r))
 
 
 def main(args):
-    guessed, ref = [((p, yields(conjuncts(p))) for p in get_passages_with_progress_bar(f, converters=FROM_FORMAT))
-                    for f in (args.guessed, args.ref)]
-    stats = SummaryStatistics.aggregate([count(g, r) for g, r in zip(guessed, ref)])
+    guessed, ref = [get_passages_with_progress_bar(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
+    stats = SummaryStatistics.aggregate([evaluate(g, r) for g, r in zip(guessed, ref)])
     stats.print()
 
 
 if __name__ == "__main__":
-    argparser = ArgumentParser(description="Evaluate conjunct spans")
+    argparser = ArgumentParser(description="Evaluate conjunct yields")
     argparser.add_argument("guessed", help="File or directory for graphs to evaluate")
     argparser.add_argument("ref", help="File or directory for graphs to use as reference")
     main(argparser.parse_args())
