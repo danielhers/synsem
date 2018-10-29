@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
 from semstr.convert import FROM_FORMAT
-from spacy.parts_of_speech import CCONJ
+from spacy.parts_of_speech import CCONJ, PUNCT
 from ucca import layer0, layer1
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages_with_progress_bar
@@ -17,7 +17,8 @@ def get_terminals(unit, visited=None, conj=False):
     outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")
                 and e.tag not in ("punct", layer1.EdgeTags.Punctuation)
                 and (conj or e.tag not in ("cc", "conj"))}
-    return ([] if unit.tag and unit.tag != layer0.NodeTags.Word else [unit]) + \
+    return ([] if unit.tag and (unit.tag not in (layer0.NodeTags.Word, layer0.NodeTags.Punct)
+                                or unit.tok[Attr.POS.value] == PUNCT) else [unit]) + \
         [t for e in outgoing for t in get_terminals(e.child, visited | outgoing, conj=True)]
 
 
@@ -33,14 +34,16 @@ def conjuncts(passage):
                         terminals = []
                         for edge in unit:
                             if edge.child.ID in ccs:
-                                if terminals:
-                                    yield terminals
-                                else:
+                                if not terminals:
                                     break
-                                terminals = []
                             elif edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene):
+                                if edge.tag == layer1.EdgeTags.ParallelScene and terminals and \
+                                        terminals[-1].position + 1 < edge.child.start_position:
+                                    yield terminals
+                                    terminals = []
                                 terminals += get_terminals(edge.child)
-                            elif terminals:
+                                continue
+                            if terminals:
                                 yield terminals
                                 terminals = []
                         if terminals:
