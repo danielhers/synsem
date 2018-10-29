@@ -11,6 +11,7 @@ echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
 source activate tupa-ud-cortex
 cd ../tupa-ud
 for d in ${CORPORA[@]}; do
+  rm -f $PARSED/conllu/${UD_MODEL[$d]}/$d.conllu
   tupa ${DATA[$d]} -m models/conll2018/${UD_MODEL[$d]} -o $PARSED/conllu/${UD_MODEL[$d]} -j $d -f conllu $*
 done
 
