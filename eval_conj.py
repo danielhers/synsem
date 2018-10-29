@@ -11,22 +11,6 @@ from ucca.textutil import Attr
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
 
 
-def conjuncts(passage):
-    for node in passage.layer(layer1.LAYER_ID).all:
-        if node.tag:  # UCCA
-            if node.tag == layer1.NodeTags.Foundational:
-                if node.connector:
-                    yield from node.centers
-                elif any(t.position > 1 and t.tok[Attr.POS.value] == CCONJ
-                         for l in node.linkers for t in l.get_terminals()):
-                    yield from node.parallel_scenes
-        else:  # UD
-            children = [e.child for e in node if e.tag == "conj"]
-            if children:  # UD and there is a coordination
-                yield node
-                yield from children
-
-
 def get_terminals(unit, visited=None, conj=False):
     if visited is None:
         return sorted(get_terminals(unit, visited=set()), key=attrgetter("position"))
@@ -37,9 +21,35 @@ def get_terminals(unit, visited=None, conj=False):
         [t for e in outgoing for t in get_terminals(e.child, visited | outgoing, conj=True)]
 
 
+def conjuncts(passage):
+    for unit in passage.layer(layer1.LAYER_ID).all:
+        if unit.tag:  # UCCA
+            if unit.tag == layer1.NodeTags.Foundational:
+                if unit.connector:  # nominal coordination
+                    yield from map(get_terminals, unit.centers)
+                else:  # predicate coordination, expressed as linkers + parallel scenes
+                    ccs = {l.ID for l in unit.linkers if all(t.tok[Attr.POS.value] == CCONJ for t in l.get_terminals())}
+                    if ccs:
+                        terminals = []
+                        for edge in unit:
+                            if edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene) \
+                                    and edge.child.ID not in ccs:
+                                terminals += get_terminals(edge.child)
+                            elif terminals:
+                                yield terminals
+                                terminals = []
+                        if terminals:
+                            yield terminals
+        else:  # UD
+            children = [e.child for e in unit if e.tag == "conj"]
+            if children:  # UD and there is a coordination
+                yield get_terminals(unit)
+                yield from map(get_terminals, children)
+
+
 def evaluate(guessed, ref):
     assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
-    guessed_yields, ref_yields = [[get_terminals(c) for c in conjuncts(p)] for p in (guessed, ref)]
+    guessed_yields, ref_yields = [list(conjuncts(p)) for p in (guessed, ref)]
     g, r = [set(frozenset(t.position for t in y) for y in yields) for yields in (guessed_yields, ref_yields)]
     common = g & r
     only_g = g - common
