@@ -1,11 +1,12 @@
 from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
+
 from semstr.convert import FROM_FORMAT
 from spacy.parts_of_speech import CCONJ, PUNCT
 from ucca import layer0, layer1
 from ucca.evaluation import SummaryStatistics
-from ucca.ioutil import get_passages_with_progress_bar
+from ucca.ioutil import get_passages
 from ucca.textutil import Attr
 
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
@@ -63,14 +64,14 @@ def evaluate(guessed, ref):
     only_g = g - common
     only_r = r - common
     if only_g or only_r:
-        for yields in guessed_yields, ref_yields:
+        for i, yields in enumerate((guessed_yields, ref_yields), start=1):
             conj = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
-            print(" | ".join(conj))
+            print(guessed.ID, i, " | ".join(conj))
     return SummaryStatistics(len(common), len(only_g), len(only_r))
 
 
 def main(args):
-    guessed, ref = [get_passages_with_progress_bar(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
+    guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
     stats = SummaryStatistics.aggregate([evaluate(g, r) for g, r in zip(guessed, ref)])
     stats.print()
 
