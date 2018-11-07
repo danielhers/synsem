@@ -3,7 +3,7 @@ from functools import partial
 from operator import attrgetter
 
 from semstr.convert import FROM_FORMAT
-from spacy.parts_of_speech import CCONJ, PUNCT
+from spacy.parts_of_speech import PUNCT
 from ucca import layer0, layer1
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages
@@ -12,47 +12,24 @@ from ucca.textutil import Attr
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
 
 
-def get_terminals(unit, visited=None, conj=False):
+def get_terminals(unit, visited=None):
     if visited is None:
         visited = set()
     outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")
-                and e.tag not in ("punct", layer1.EdgeTags.Punctuation)
-                and (conj or e.tag not in ("cc", "conj"))}
+                and e.tag not in ("punct", layer1.EdgeTags.Punctuation)}
     return ([] if unit.tag and (unit.tag not in (layer0.NodeTags.Word, layer0.NodeTags.Punct)
                                 or unit.tok[Attr.POS.value] == PUNCT) else [unit]) + \
-        [t for e in outgoing for t in get_terminals(e.child, visited | outgoing, conj=True)]
+        [t for e in outgoing for t in get_terminals(e.child, visited | outgoing)]
 
 
 def subordinate_clauses(passage):
     for unit in passage.layer(layer1.LAYER_ID).all:
         if unit.tag:  # UCCA
             if unit.tag == layer1.NodeTags.Foundational:
-                if unit.connector:  # nominal coordination
-                    yield from map(get_terminals, unit.centers)
-                else:  # predicate coordination, expressed as linkers + parallel scenes
-                    ccs = {l.ID for l in unit.linkers if all(t.tok[Attr.POS.value] == CCONJ for t in l.get_terminals())}
-                    if ccs:
-                        terminals = []
-                        for edge in unit:
-                            if edge.child.ID in ccs:
-                                if not terminals:
-                                    break
-                            elif edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene):
-                                if edge.tag == layer1.EdgeTags.ParallelScene and terminals and \
-                                        terminals[-1].position + 1 < edge.child.start_position:
-                                    yield terminals
-                                    terminals = []
-                                terminals += get_terminals(edge.child)
-                                continue
-                            if terminals:
-                                yield terminals
-                                terminals = []
-                        if terminals:
-                            yield terminals
+                yield from map(get_terminals, filter(layer1.FoundationalNode.is_scene, unit.elaborators))
         else:  # UD
-            children = [e.child for e in unit if e.tag == "conj"]
+            children = [e.child for e in unit if e.tag in ("acl",)]
             if children:  # UD and there is a coordination
-                yield get_terminals(unit)
                 yield from map(get_terminals, children)
 
 
@@ -63,7 +40,7 @@ def evaluate(guessed, ref):
     common = g & r
     only_g = g - common
     only_r = r - common
-    if only_g or only_r:
+    if g or r:
         for i, yields in enumerate((guessed_yields, ref_yields), start=1):
             conj = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
             print(guessed.ID, i, " | ".join(conj))
