@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
-from semstr.conversion.conllu import PUNCT_TAG
 
+from semstr.conversion.conllu import PUNCT_TAG
 from semstr.convert import FROM_FORMAT
 from ucca import layer0, layer1
 from ucca.evaluation import SummaryStatistics
@@ -21,13 +21,18 @@ def get_terminals(unit, visited=None):
     return terminals
 
 
+def is_scene(node):
+    return node.is_scene() and sum(len(t.text) for t in get_terminals(node.state or node.process)) > 2 \
+        and len(node.get_terminals(punct=False)) > 1
+
+
 def subordinate_clauses(passage):
     for unit in passage.layer(layer1.LAYER_ID).all:
         if unit.tag:  # UCCA
             if unit.tag == layer1.NodeTags.Foundational:
                 yield from map(get_terminals, filter(layer1.FoundationalNode.is_scene, unit.elaborators))
         else:  # UD
-            children = [e.child for e in unit if e.tag in ("acl",)]
+            children = [e.child for e in unit if e.tag.partition(":")[0] in ("acl",)]
             if children:  # UD and there is a subordinate clause
                 yield from map(get_terminals, children)
 
@@ -42,11 +47,14 @@ def evaluate(guessed, ref):
     common = g & r
     only_g = g - common
     only_r = r - common
+    stat = SummaryStatistics(len(common), len(only_g), len(only_r))
     if g or r:
-        for i, yields in enumerate((guessed_yields, ref_yields), start=1):
+        print(guessed.ID, "F1 = %.3f" % stat.f1)
+        for yields in guessed_yields, ref_yields:
             clauses = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
-            print(guessed.ID, i, " | ".join(clauses))
-    return SummaryStatistics(len(common), len(only_g), len(only_r))
+            print(" | ".join(clauses))
+        print()
+    return stat
 
 
 def main(args):
