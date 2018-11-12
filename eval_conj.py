@@ -69,10 +69,10 @@ def evaluate(guessed, ref):
     only_r = r - common
     stat = SummaryStatistics(len(common), len(only_g), len(only_r))
     if g or r:
-        print(guessed.ID, "F1 = %.3f" % stat.f1)
+        print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
         for yields in guessed_yields, ref_yields:
             conj = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
-            print(" | ".join(conj))
+            print(*conj, sep="\t")
         print()
     return stat
 
