@@ -26,20 +26,20 @@ def is_scene(node):
         and len(node.get_terminals(punct=False)) > 1
 
 
-def subordinate_clauses(passage):
+def subordinate_clauses(passage, relations):
     for unit in passage.layer(layer1.LAYER_ID).all:
         if unit.tag:  # UCCA
             if unit.tag == layer1.NodeTags.Foundational:
                 yield from map(get_terminals, filter(layer1.FoundationalNode.is_scene, unit.elaborators))
         else:  # UD
-            children = [e.child for e in unit if e.tag.partition(":")[0] in ("acl",)]
+            children = [e.child for e in unit if e.tag.partition(":")[0] in relations]
             if children:  # UD and there is a subordinate clause
                 yield from map(get_terminals, children)
 
 
-def evaluate(guessed, ref, errors=False):
+def evaluate(guessed, ref, relations, errors=False):
     assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
-    guessed_yields, ref_yields = [list(subordinate_clauses(p)) for p in (guessed, ref)]
+    guessed_yields, ref_yields = [list(subordinate_clauses(p, relations)) for p in (guessed, ref)]
     punct_positions = {t.position for yields in (guessed_yields, ref_yields) for y in yields for t in y
                        if t.tag in (layer0.NodeTags.Punct, PUNCT_TAG)}
     g, r = [set(frozenset(t.position for t in y) - punct_positions for y in yields)
@@ -63,7 +63,8 @@ def evaluate(guessed, ref, errors=False):
 
 def main(args):
     guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
-    stats = SummaryStatistics.aggregate([evaluate(g, r, errors=args.errors) for g, r in zip(guessed, ref)])
+    stats = SummaryStatistics.aggregate([evaluate(g, r, relations=args.relations, errors=args.errors)
+                                         for g, r in zip(guessed, ref)])
     stats.print()
 
 
@@ -72,4 +73,6 @@ if __name__ == "__main__":
     argparser.add_argument("guessed", help="File or directory for graphs to evaluate")
     argparser.add_argument("ref", help="File or directory for graphs to use as reference")
     argparser.add_argument("-e", "--errors", action="store_true", help="Print just false negatives, with image links")
+    argparser.add_argument("-r", "--relations", default=["acl"], nargs="+", choices=("acl", "advcl", "xcomp", "ccomp"),
+                           help="Dependency relation of dependent clause to use for extracting UD yields")
     main(argparser.parse_args())
