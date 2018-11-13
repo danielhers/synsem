@@ -30,7 +30,8 @@ def subordinate_clauses(passage, relations):
     for unit in passage.layer(layer1.LAYER_ID).all:
         if unit.tag:  # UCCA
             if unit.tag == layer1.NodeTags.Foundational:
-                yield from map(get_terminals, filter(layer1.FoundationalNode.is_scene, unit.elaborators))
+                yield from map(get_terminals, filter(layer1.FoundationalNode.is_scene,
+                                                     unit.participants if relations == ["xcomp"] else unit.elaborators))
         else:  # UD
             children = [e.child for e in unit if e.tag.partition(":")[0] in relations]
             if children:  # UD and there is a subordinate clause
