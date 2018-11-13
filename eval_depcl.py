@@ -37,7 +37,7 @@ def subordinate_clauses(passage):
                 yield from map(get_terminals, children)
 
 
-def evaluate(guessed, ref):
+def evaluate(guessed, ref, errors=False):
     assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
     guessed_yields, ref_yields = [list(subordinate_clauses(p)) for p in (guessed, ref)]
     punct_positions = {t.position for yields in (guessed_yields, ref_yields) for y in yields for t in y
@@ -48,7 +48,11 @@ def evaluate(guessed, ref):
     only_g = g - common
     only_r = r - common
     stat = SummaryStatistics(len(common), len(only_g), len(only_r))
-    if g or r:
+    if errors:
+        for y in sorted(only_r, key=min):
+            print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
+                  ref.ID[:-3], " ".join(ref.by_id("0.%d" % (i+1)).token.text for i in y), sep="\t")
+    elif g or r:
         print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
         for yields in guessed_yields, ref_yields:
             clauses = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
@@ -59,7 +63,7 @@ def evaluate(guessed, ref):
 
 def main(args):
     guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
-    stats = SummaryStatistics.aggregate([evaluate(g, r) for g, r in zip(guessed, ref)])
+    stats = SummaryStatistics.aggregate([evaluate(g, r, errors=args.errors) for g, r in zip(guessed, ref)])
     stats.print()
 
 
@@ -67,4 +71,5 @@ if __name__ == "__main__":
     argparser = ArgumentParser(description="Evaluate yields of subordinate clauses or elaborator scenes")
     argparser.add_argument("guessed", help="File or directory for graphs to evaluate")
     argparser.add_argument("ref", help="File or directory for graphs to use as reference")
+    argparser.add_argument("-e", "--errors", action="store_true", help="Print just false negatives, with image links")
     main(argparser.parse_args())
