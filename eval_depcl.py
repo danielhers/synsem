@@ -51,7 +51,7 @@ def evaluate(guessed, ref, relations, errors=False):
     if errors:
         for y in sorted(only_r, key=min):
             print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
-                  ref.ID[:-3], " ".join(ref.by_id("0.%d" % (i+1)).token.text for i in y), sep="\t")
+                  ref.ID[:-3], " ".join(ref.by_id("0.%d" % (i+1)).token.text for i in sorted(y)), sep="\t")
     elif g or r:
         print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
         for yields in guessed_yields, ref_yields:
