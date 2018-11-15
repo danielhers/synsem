@@ -10,7 +10,7 @@ from ucca.core import Node, Passage, Edge
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages
 
-FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
+FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True, enhanced=False)
 
 
 class Evaluator:
@@ -34,25 +34,27 @@ class Evaluator:
             if self.relations is None:
                 yield self.get_terminals(unit)
             else:
-                children = [e.child for e in unit if e.tag in self.relations]
-                if children:
-                    yield from map(self.get_terminals, children)
+                for edge in unit:
+                    if edge.tag in self.relations:
+                        terminals = self.get_terminals(edge.child)
+                        yield terminals
 
     def evaluate(self, guessed: Passage, ref: Passage):
         assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
         guessed_yields, ref_yields = [list(self.get_yields(p)) for p in (guessed, ref)]
         punct_positions = {t.position for yields in (guessed_yields, ref_yields) for y in yields for t in y
                            if t.tag in (layer0.NodeTags.Punct, PUNCT_TAG)}
-        g, r = [set(frozenset(t.position for t in y) - punct_positions for y in yields)
+        g, r = [set(filter(None, (frozenset(t.position for t in y) - punct_positions for y in yields)))
                 for yields in (guessed_yields, ref_yields)]
         common = g & r
         only_g = g - common
         only_r = r - common
         stat = SummaryStatistics(len(common), len(only_g), len(only_r))
         if self.errors:
-            for y in sorted(only_r, key=min):
-                print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
-                      ref.ID[:-3], " ".join(ref.by_id("0.%d" % i).text for i in sorted(y)), sep="\t")
+            if only_r:
+                for y in sorted(only_r, key=min):
+                    print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
+                          ref.ID[:-3], " ".join(ref.by_id("0.%d" % i).text for i in sorted(y)), sep="\t")
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
             for yields in guessed_yields, ref_yields:
