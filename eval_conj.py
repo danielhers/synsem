@@ -1,90 +1,48 @@
 from argparse import ArgumentParser
-from functools import partial
-from operator import attrgetter
-
-from semstr.conversion.conllu import PUNCT_TAG
-from semstr.convert import FROM_FORMAT
 from spacy.parts_of_speech import CCONJ
-from ucca import layer0, layer1
-from ucca.evaluation import SummaryStatistics
-from ucca.ioutil import get_passages
+from ucca import layer1
+from ucca.core import Passage
 from ucca.textutil import Attr
 
-FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True, strip_suffixes=False)
+from compare_yields import Evaluator
+
+COORDINATION_UD_TAGS = {"cc", "conj"}
 
 
-def get_terminals(unit, visited=None, conj=False):
-    if visited is None:
-        visited = set()
-    outgoing = {e for e in set(unit) - visited if not e.attrib.get("remote")
-                and (conj or e.tag not in ("cc", "conj"))}
-    terminals = [t for e in outgoing for t in get_terminals(e.child, visited | outgoing, conj=True)]
-    if not unit.tag or unit.tag in (layer0.NodeTags.Word, layer0.NodeTags.Punct):  # UD: all nodes; UCCA: only terminals
-        terminals.append(unit)
-    return terminals
-
-
-def conjuncts(passage):
-    for unit in passage.layer(layer1.LAYER_ID).all:
-        if unit.tag:  # UCCA
-            if unit.tag == layer1.NodeTags.Foundational:
-                if unit.connector:  # nominal coordination
-                    yield from map(get_terminals, unit.centers)
-                else:  # predicate coordination, expressed as linkers + parallel scenes
-                    ccs = {l.ID for l in unit.linkers if all(t.tok[Attr.POS.value] == CCONJ for t in l.get_terminals())}
-                    if ccs:
-                        terminals = []
-                        for edge in unit:
-                            if edge.child.ID in ccs:
-                                if not terminals:
-                                    break
-                            elif edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene):
-                                if edge.tag == layer1.EdgeTags.ParallelScene and terminals and \
-                                        terminals[-1].position + 1 < edge.child.start_position:
+class ConjunctEvaluator(Evaluator):
+    def get_yields(self, passage: Passage):
+        for unit in passage.layer(layer1.LAYER_ID).all:
+            if unit.tag:  # UCCA
+                if unit.tag == layer1.NodeTags.Foundational:
+                    if unit.connector:  # nominal coordination
+                        yield from map(self.get_terminals, unit.centers)
+                    else:  # predicate coordination, expressed as linkers + parallel scenes
+                        ccs = {l.ID for l in unit.linkers if all(t.tok[Attr.POS.value] == CCONJ for t in l.get_terminals())}
+                        if ccs:
+                            terminals = []
+                            for edge in unit:
+                                if edge.child.ID in ccs:
+                                    if not terminals:
+                                        break
+                                elif edge.tag in (layer1.EdgeTags.Linker, layer1.EdgeTags.ParallelScene):
+                                    if edge.tag == layer1.EdgeTags.ParallelScene and terminals and \
+                                            terminals[-1].position + 1 < edge.child.start_position:
+                                        yield terminals
+                                        terminals = []
+                                    terminals += self.get_terminals(edge.child)
+                                    continue
+                                if terminals:
                                     yield terminals
                                     terminals = []
-                                terminals += get_terminals(edge.child)
-                                continue
                             if terminals:
                                 yield terminals
-                                terminals = []
-                        if terminals:
-                            yield terminals
-        else:  # UD
-            children = [e.child for e in unit if e.tag == "conj"]
-            if children:  # UD and there is a coordination
-                yield get_terminals(unit)
-                yield from map(get_terminals, children)
-
-
-def evaluate(guessed, ref):
-    assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
-    guessed_yields, ref_yields = [list(conjuncts(p)) for p in (guessed, ref)]
-    punct_positions = {t.position for yields in (guessed_yields, ref_yields) for y in yields for t in y
-                       if t.tag in (layer0.NodeTags.Punct, PUNCT_TAG)}
-    g, r = [set(frozenset(t.position for t in y) - punct_positions for y in yields)
-            for yields in (guessed_yields, ref_yields)]
-    common = g & r
-    only_g = g - common
-    only_r = r - common
-    stat = SummaryStatistics(len(common), len(only_g), len(only_r))
-    if g or r:
-        print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
-        for yields in guessed_yields, ref_yields:
-            conj = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
-            print(*conj, sep="\t")
-        print()
-    return stat
-
-
-def main(args):
-    guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (args.guessed, args.ref)]
-    stats = SummaryStatistics.aggregate([evaluate(g, r) for g, r in zip(guessed, ref)])
-    stats.print()
+            else:  # UD
+                children = [e.child for e in unit if e.tag == "conj"]
+                if children:  # UD and there is a coordination
+                    yield from (self.get_terminals(c, excluded_tags=COORDINATION_UD_TAGS) for c in [unit] + children)
 
 
 if __name__ == "__main__":
     argparser = ArgumentParser(description="Evaluate conjunct yields")
-    argparser.add_argument("guessed", help="File or directory for graphs to evaluate")
-    argparser.add_argument("ref", help="File or directory for graphs to use as reference")
-    main(argparser.parse_args())
+    ConjunctEvaluator.add_arguments(argparser)
+    ConjunctEvaluator(**vars(argparser.parse_args())).run(**vars(argparser.parse_args()))
