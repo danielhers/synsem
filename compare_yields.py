@@ -10,7 +10,7 @@ from ucca.core import Node, Passage, Edge
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages
 
-FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True, preprocess=True)
+FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True)
 
 
 class Evaluator:
@@ -52,7 +52,7 @@ class Evaluator:
         if self.errors:
             for y in sorted(only_r, key=min):
                 print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
-                      ref.ID[:-3], " ".join(ref.by_id("0.%d" % (i+1)).token.text for i in sorted(y)), sep="\t")
+                      ref.ID[:-3], " ".join(ref.by_id("0.%d" % i).text for i in sorted(y)), sep="\t")
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
             for yields in guessed_yields, ref_yields:
