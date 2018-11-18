@@ -43,7 +43,7 @@ class Evaluator:
         guessed_yields, ref_yields = [list(self.get_yields(p)) for p in (guessed, ref)]
         punct_positions = {t.position for p, yields in zip((guessed, ref), (guessed_yields, ref_yields))
                            for y in yields for t in y if t.punct}
-        g, r = [set(filter(None, (frozenset(t.position for t in y) - punct_positions for y in yields)))
+        g, r = [set(filter(None, (frozenset(t.position for t in y) - punct_positions - {0} for y in yields)))
                 for yields in (guessed_yields, ref_yields)]
         common = g & r
         only_g = g - common
@@ -74,7 +74,7 @@ class Evaluator:
         p.add_argument("guessed", help="File or directory for graphs to evaluate")
         p.add_argument("ref", help="File or directory for graphs to use as reference")
         p.add_argument("-e", "--errors", action="store_true", help="Print just false negatives, with image links")
-        p.add_argument("-r", "--relations", default=["acl"], nargs="+",
+        p.add_argument("-r", "--relations", nargs="+",
                        help="Dependency relation of dependent clause to use for extracting UD yields")
 
 
