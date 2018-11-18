@@ -2,7 +2,6 @@ from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
 
-from semstr.conversion.conllu import PUNCT_TAG
 from semstr.convert import FROM_FORMAT
 from typing import Set, Tuple, List
 from ucca import layer0, layer1
@@ -42,8 +41,8 @@ class Evaluator:
     def evaluate(self, guessed: Passage, ref: Passage):
         assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
         guessed_yields, ref_yields = [list(self.get_yields(p)) for p in (guessed, ref)]
-        punct_positions = {t.position for yields in (guessed_yields, ref_yields) for y in yields for t in y
-                           if t.tag in (layer0.NodeTags.Punct, PUNCT_TAG)}
+        punct_positions = {t.position for p, yields in zip((guessed, ref), (guessed_yields, ref_yields))
+                           for y in yields for t in y if t.punct}
         g, r = [set(filter(None, (frozenset(t.position for t in y) - punct_positions for y in yields)))
                 for yields in (guessed_yields, ref_yields)]
         common = g & r
