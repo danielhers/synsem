@@ -24,6 +24,8 @@ for d in ${CORPORA[@]}; do
         python -m semstr.evaluate $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -q $*
         python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
         python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -c $OUT/ud/$MODEL.ud.counts.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
+      else
+        echo $GUESSED not found, cannot evaluate $MODEL
       fi
     done
   fi
@@ -36,6 +38,8 @@ for d in ${CORPORA[@]}; do
       python -m semstr.evaluate $GUESSED $REF --unlabeled -s $OUT/ucca/$MODEL.unlabeled.csv -q $*
       python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.csv -c $OUT/ucca/$MODEL.counts.csv -o $OUT/all/ucca/$MODEL.csv -q $*
       python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.csv -c $OUT/ud/$MODEL.counts.csv -o $OUT/all/ud/$MODEL.csv --ref-yield-tags=$UD_REF_YIELDS -q $*
+    else
+      echo $GUESSED not found, cannot evaluate $MODEL
     fi
   done
 done
