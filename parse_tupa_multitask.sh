@@ -12,10 +12,15 @@ source activate tupa-dev-cortex
 cd ../tupa-dev
 for d in ${CORPORA[@]}; do
   echo $d
-  if [[ -z "${DATA[$d]}" ]]; then
-    echo No UCCA data found for $d
+  data=${DATA[$d]}
+  if [[ -z "$data" ]]; then
+    echo No UCCA data found for $d, using UD data instead: ${UD_DATA[$d]}
+    data=${UD_DATA[$d]}
+  fi
+  if [[ -z "$data" ]]; then
+    echo No data found for $d
   else
-    tupa ${DATA[$d]} -m models/stripped/${UCCA_UD_MODEL[$d]} -o $PARSED/xml/${UCCA_UD_MODEL[$d]}/$d $*
+    tupa $data -m models/stripped/${UCCA_UD_MODEL[$d]} -o $PARSED/xml/${UCCA_UD_MODEL[$d]}/$d $*
   fi
 done
 
