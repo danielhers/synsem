@@ -29,11 +29,20 @@ COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
 Corpus = namedtuple("Corpus", ("index", "name"))
 
 CORPORA = {
-    "ewt":        Corpus(0, "English EWT"),
-    "wiki-dev":   Corpus(1, "English Wiki dev"),
-    "20k":        Corpus(2, "English 20K"),
-    "20k-fr-dev": Corpus(3, "French 20K"),
-    "20k-de-dev": Corpus(4, "German 20K"),
+    "ewt":         Corpus(0,  "English EWT sentences with UCCA annotation"),
+    "ewt-dev":     Corpus(1,  "English EWT UD dev"),
+    "ewt-test":    Corpus(2,  "English EWT UD test"),
+    "wiki-dev":    Corpus(3,  "English Wiki dev"),
+    "wiki-test":   Corpus(4,  "English Wiki test"),
+    "20k":         Corpus(5,  "English 20K"),
+    "20k-fr-dev":  Corpus(6,  "French 20K dev"),
+    "20k-fr-test": Corpus(7,  "French 20K test"),
+    "fr-gsd-dev":  Corpus(8,  "French GSD dev"),
+    "fr-gsd-test": Corpus(9,  "French GSD test"),
+    "20k-de-dev":  Corpus(10, "German 20K dev"),
+    "20k-de-test": Corpus(11, "German 20K test"),
+    "de-gsd-dev":  Corpus(12, "German GSD dev"),
+    "de-gsd-test": Corpus(13, "German GSD test"),
 }
 
 
@@ -83,7 +92,7 @@ def eval_corpus(corpus, reports):
     print()
     columns = list(map(strip, sorted(set(c for d in data for c in d.column_names()[6:]))))
     print(*([corpus.name] + 14 * [""] + columns), sep="\t")
-    for tup in groupby(data, key=Data.ref):
+    for tup in groupby(sorted(data, key=Data.ref), key=Data.ref):
         eval_ref(*tup, columns=columns)
 
 
