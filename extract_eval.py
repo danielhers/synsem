@@ -24,6 +24,9 @@ COLUMNS = pd.Series(list(map("_".join, chain(
     product(["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["f1"])))))
 
 COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
+    ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["ref", "guessed", "matches"]))))
+
+REF_COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
     ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["ref"]))))
 
 Corpus = namedtuple("Corpus", ("index", "name"))
