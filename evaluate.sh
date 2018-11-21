@@ -24,9 +24,11 @@ for d in ${CORPORA[@]}; do
       [[ -d $GUESSED ]] || GUESSED=$GUESSED.conllu
       if [[ -e $GUESSED ]]; then
         echo $GUESSED $REF
-        python -m semstr.evaluate $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -q $*
-        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
-        python -m semstr.evaluate $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -c $OUT/ud/$MODEL.ud.counts.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
+        python -m semstr.evaluate --no-enhanced $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -q $*
+        if [[ -n "${DATA[$d]}" ]]; then
+          python -m semstr.evaluate --no-enhanced $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
+        fi
+        python -m semstr.evaluate --no-enhanced $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -c $OUT/ud/$MODEL.ud.counts.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
       else
         echo $GUESSED not found, cannot evaluate $MODEL
       fi
