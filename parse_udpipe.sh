@@ -20,7 +20,7 @@ for d in ${CORPORA[@]}; do
     echo No UD input data found for $d
   else
     echo $data
-    python -m semstr.scripts.udpipe $data -u ../udpipe/models/${UDPIPE_MODEL[$d]} -o $PARSED/conllu/${UDPIPE_MODEL[$d]} -j $d $*
+    run python -m semstr.scripts.udpipe $data -u ../udpipe/models/${UDPIPE_MODEL[$d]} -o $PARSED/conllu/${UDPIPE_MODEL[$d]} -j $d $*
   fi
 done
 

@@ -3,6 +3,9 @@
 declare -A DATA UCCA_MODEL UCCA_UD_MODEL UD_MODEL UDPIPE_MODEL UD_DATA
 CORPORA=(ewt ewt-dev ewt-test wiki-dev wiki-test 20k 20k-fr-dev 20k-fr-test fr-gsd-dev fr-gsd-test 20k-de-dev 20k-de-test de-gsd-dev de-gsd-test)
 PARSED=$PWD/parsed
+func run() {
+  $* || echo $* >> failed.txt
+}
 
 DATA[ewt]=../converted-udpipe/UCCA_English-EWT
 DATA[wiki-dev]=../shared-task/data/dev-xml/UCCA_English-Wiki

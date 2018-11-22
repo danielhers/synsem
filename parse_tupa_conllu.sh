@@ -21,7 +21,7 @@ for d in ${CORPORA[@]}; do
   if [[ -z "$data" ]]; then
     echo No UD input data found for $d
   else
-    tupa $data -m models/ud-2.3/${UD_MODEL[$d]} -o $PARSED/conllu/${UD_MODEL[$d]} -j $d -f conllu $*
+    run tupa $data -m models/ud-2.3/${UD_MODEL[$d]} -o $PARSED/conllu/${UD_MODEL[$d]} -j $d -f conllu $*
   fi
 done
 

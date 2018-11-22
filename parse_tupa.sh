@@ -20,7 +20,7 @@ for d in ${CORPORA[@]}; do
   if [[ -z "$data" ]]; then
     echo No data found for $d
   else
-    tupa $data -m models/${UCCA_MODEL[$d]} -o $PARSED/xml/${UCCA_MODEL[$d]}/$d $*
+    run tupa $data -m models/${UCCA_MODEL[$d]} -o $PARSED/xml/${UCCA_MODEL[$d]}/$d $*
   fi
 done
 
