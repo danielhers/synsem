@@ -43,23 +43,23 @@ UCCA_UD_MODEL[20k-de-test]=ucca-ud-de-bilstm-20180917
 UCCA_UD_MODEL[de-gsd-dev]=ucca-ud-de-bilstm-20180917
 UCCA_UD_MODEL[de-gsd-test]=ucca-ud-de-bilstm-20180917
 
+UD_MODEL[ewt]=en_ewt-no-reviews-20181119
+UD_MODEL[ewt-dev]=en_ewt-20181119
+UD_MODEL[ewt-test]=en_ewt-20181119
+UD_MODEL[wiki-dev]=en_ewt-20181119
+UD_MODEL[wiki-test]=en_ewt-20181119
+UD_MODEL[20k]=en_ewt-20181119
+UD_MODEL[20k-fr-dev]=fr_gsd-20181119
+UD_MODEL[20k-fr-test]=fr_gsd-20181119
+UD_MODEL[fr-gsd-dev]=fr_gsd-20181119
+UD_MODEL[fr-gsd-test]=fr_gsd-20181119
+UD_MODEL[20k-de-dev]=de_gsd-20181119
+UD_MODEL[20k-de-test]=de_gsd-20181119
+UD_MODEL[de-gsd-dev]=de_gsd-20181119
+UD_MODEL[de-gsd-test]=de_gsd-20181119
+
 # Use this vim command to switch between commented-out and actual values:
 # %s/\([a-z0-9._-]\+\)\(\s\+#\s\+\)\(.*\)/\3\2\1
-UD_MODEL[ewt]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[ewt-dev]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[ewt-test]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[wiki-dev]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[wiki-test]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[20k]=en_ewt-20181023  # en_gum-20181107
-UD_MODEL[20k-fr-dev]=fr_gsd-20181024
-UD_MODEL[20k-fr-test]=fr_gsd-20181024
-UD_MODEL[fr-gsd-dev]=fr_gsd-20181024
-UD_MODEL[fr-gsd-test]=fr_gsd-20181024
-UD_MODEL[20k-de-dev]=de_gsd-20181024
-UD_MODEL[20k-de-test]=de_gsd-20181024
-UD_MODEL[de-gsd-dev]=de_gsd-20181024
-UD_MODEL[de-gsd-test]=de_gsd-20181024
-
 UDPIPE_MODEL[ewt]=english-ewt-no-reviews-ud-2.3-181119.udpipe  # english-ewt-no-reviews-ud-2.2-181023.udpipe  # english-gum-ud-2.2-conll18-180430.udpipe
 UDPIPE_MODEL[ewt-dev]=english-ewt-ud-2.3-181119.udpipe  # english-ewt-no-reviews-ud-2.2-181023.udpipe  # english-gum-ud-2.2-conll18-180430.udpipe
 UDPIPE_MODEL[ewt-test]=english-ewt-ud-2.3-181119.udpipe  # english-ewt-no-reviews-ud-2.2-181023.udpipe  # english-gum-ud-2.2-conll18-180430.udpipe
