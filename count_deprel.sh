@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR=$PWD
-. $DIR/models.sh
+. models.sh
 [[ $# -ge 1 ]] && CORPORA=("$@")
 
 for d in ${CORPORA[@]}; do

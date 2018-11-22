@@ -4,7 +4,7 @@
 #SBATCH --array=0-13
 
 DIR=$PWD
-. $DIR/models.sh
+. models.sh
 echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
 [[ -n "$SLURM_ARRAY_TASK_ID" ]] && CORPORA=(${CORPORA[$SLURM_ARRAY_TASK_ID]})
 
