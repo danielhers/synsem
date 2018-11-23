@@ -12,10 +12,10 @@ source activate tupa-dev-cortex
 cd ../tupa-dev
 for d in ${CORPORA[@]}; do
   echo $d
-  data=${DATA[$d]}
+  data=${UD_DATA[$d]}
   if [[ -z "$data" ]]; then
-    echo No UCCA data found for $d, using UD data instead: ${UD_DATA[$d]}
-    data=${UD_DATA[$d]}
+    echo No UD data found for $d, using UCCA data instead as input
+    data=${DATA[$d]}
   fi
   if [[ -z "$data" ]]; then
     echo No data found for $d

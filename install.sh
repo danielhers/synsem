@@ -2,6 +2,7 @@
 
 cd ../tupa-dev
 ./activate.sh
+pip install wheel
 for d in semstr ucca; do
     until yes | pip uninstall $d |& grep -q Skipping; do :; done
     cd ../$d

@@ -16,7 +16,7 @@ def split(s):
 
 UCCA_RELS = split("A	C	D	E	F	G	H	L	N	P	R	S	U")
 UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	csubj"
-                "	dep	det	discourse	expl	fixed	flat	goeswith	iobj	list	mark	nmod	nsubj	nummod"
+                "	dep	det	discourse	expl	fixed	flat	goeswith	head	iobj	list	mark	nmod	nsubj	nummod"
                 "	obj	obl	orphan	parataxis	punct	root	vocative	xcomp")
 
 COLUMNS = pd.Series(list(map("_".join, chain(
