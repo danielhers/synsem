@@ -52,7 +52,7 @@ class Evaluator:
         if self.errors:
             if only_r:
                 for y in sorted(only_r, key=min):
-                    print("https://github.com/danielhers/UCCA_English-EWT/blob/master-images/%s.svg" % ref.ID,
+                    print("https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-images/%s.svg" % ref.ID,
                           ref.ID[:-3], " ".join(ref.by_id("0.%d" % i).text for i in sorted(y)), sep="\t")
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
