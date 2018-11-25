@@ -9,14 +9,18 @@ from ucca.core import Node, Passage, Edge
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages
 
+IMAGE_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-images/%s.svg"
+UD_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-ud/%s.conllu"
+
 FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True, enhanced=False)
 
 
 class Evaluator:
-    def __init__(self, relations: Tuple[str] = None, errors: bool = False, **kwargs):
+    def __init__(self, relations: Tuple[str] = None, errors: bool = False, all_yields: bool = False, **kwargs):
         del kwargs
         self.relations = relations
         self.errors = errors
+        self.all_yields = all_yields
 
     def get_terminals(self, unit: Node, visited: Set[Edge] = None, excluded_tags: Set[str] = None):
         if visited is None:
@@ -30,34 +34,53 @@ class Evaluator:
 
     def get_yields(self, passage: Passage):
         for unit in passage.layer(layer1.LAYER_ID).all:
-            if self.relations is None:
-                yield self.get_terminals(unit)
-            else:
-                for edge in unit:
-                    if edge.tag in self.relations:
-                        terminals = self.get_terminals(edge.child)
-                        yield terminals
+            for edge in unit:
+                if (self.relations is None or edge.tag in self.relations) and edge.tag != layer1.EdgeTags.Terminal \
+                        and not edge.attrib.get("remote") and not edge.child.attrib.get("implicit"):
+                    yield self.get_terminals(edge.child), edge.tag
+
+    @staticmethod
+    def join_tags(yields, punct_positions):
+        ret = {}
+        for y, t in yields:
+            y = frozenset(t.position for t in y) - punct_positions - {0}
+            if y:
+                ret.setdefault(y, []).append(t)
+        return ret
+
+    @staticmethod
+    def get_tags(tags, y):
+        return "|".join(sorted(tags.get(y, ())))
+
+    @staticmethod
+    def to_text(p, y):
+        return " ".join(p.by_id("0.%d" % i).text for i in sorted(y))
 
     def evaluate(self, guessed: Passage, ref: Passage):
         assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
-        guessed_yields, ref_yields = [list(self.get_yields(p)) for p in (guessed, ref)]
-        punct_positions = {t.position for p, yields in zip((guessed, ref), (guessed_yields, ref_yields))
-                           for y in yields for t in y if t.punct}
-        g, r = [set(filter(None, (frozenset(t.position for t in y) - punct_positions - {0} for y in yields)))
-                for yields in (guessed_yields, ref_yields)]
+        gyields, ryields = [list(self.get_yields(p)) for p in (guessed, ref)]
+        punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for t in y if t.punct}
+        gtags, rtags = [self.join_tags(yields, punct_positions) for yields in (gyields, ryields)]
+        g, r = list(map(set, (gtags, rtags)))
         common = g & r
         only_g = g - common
         only_r = r - common
         stat = SummaryStatistics(len(common), len(only_g), len(only_r))
-        if self.errors:
+        image_link = IMAGE_LINK_FORMAT % ref.ID
+        ud_link = UD_LINK_FORMAT % ref.ID
+        if self.all_yields:
+            for y in sorted(g | r, key=min):
+                print(image_link, ud_link, self.get_tags(gtags, y), self.get_tags(rtags, y), ref.ID[:-3],
+                      self.to_text(ref, y), sep="\t")
+        elif self.errors:
             if only_r:
                 for y in sorted(only_r, key=min):
-                    print("https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-images/%s.svg" % ref.ID,
-                          ref.ID[:-3], " ".join(ref.by_id("0.%d" % i).text for i in sorted(y)), sep="\t")
+                    print(image_link, ud_link, ref.ID[:-3], self.to_text(ref, y), sep="\t")
+
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
-            for yields in guessed_yields, ref_yields:
-                texts = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y in yields]
+            for yields in gyields, ryields:
+                texts = [" ".join(map(str, sorted(y, key=attrgetter("position")))) for y, _ in yields]
                 print(*texts, sep="\t")
             print()
         return stat
@@ -73,7 +96,9 @@ class Evaluator:
     def add_arguments(p):
         p.add_argument("guessed", help="File or directory for graphs to evaluate")
         p.add_argument("ref", help="File or directory for graphs to use as reference")
-        p.add_argument("-e", "--errors", action="store_true", help="Print just false negatives, with image links")
+        g = p.add_mutually_exclusive_group()
+        g.add_argument("-e", "--errors", action="store_true", help="Print just false negatives, with image links")
+        g.add_argument("-a", "--all-yields", action="store_true", help="Print all examples, with image links")
         p.add_argument("-r", "--relations", nargs="+",
                        help="Dependency relation of dependent clause to use for extracting UD yields")
 
