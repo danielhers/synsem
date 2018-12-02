@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --mem=10G
-#SBATCH --time=0-3
+#SBATCH --time=0-0:10
 #SBATCH --array=0-13
 
 DIR=$PWD
