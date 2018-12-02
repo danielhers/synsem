@@ -7,7 +7,7 @@ run() {
   $* || echo $* >> failed.txt
 }
 
-DATA[ewt]=../converted-udpipe/UCCA_English-EWT
+DATA[ewt]=../converted/UCCA_English-EWT
 DATA[wiki-dev]=../shared-task/data/dev-xml/UCCA_English-Wiki
 DATA[wiki-test]=../shared-task/data/test-xml-gold/UCCA_English-Wiki
 DATA[20k]=../shared-task/data/test-xml-gold/UCCA_English-20K
@@ -16,35 +16,35 @@ DATA[20k-fr-test]=../shared-task/data/test-xml-gold/UCCA_French-20K
 DATA[20k-de-dev]=../shared-task/data/dev-xml/UCCA_German-20K
 DATA[20k-de-test]=../shared-task/data/test-xml-gold/UCCA_German-20K
 
-UCCA_MODEL[ewt]=ucca-bilstm-20180917
-UCCA_MODEL[ewt-dev]=ucca-bilstm-20180917
-UCCA_MODEL[ewt-test]=ucca-bilstm-20180917
-UCCA_MODEL[wiki-dev]=ucca-bilstm-20180917
-UCCA_MODEL[wiki-test]=ucca-bilstm-20180917
-UCCA_MODEL[20k]=ucca-bilstm-20180917
-UCCA_MODEL[20k-fr-dev]=ucca-fr-bilstm-20180917
-UCCA_MODEL[20k-fr-test]=ucca-fr-bilstm-20180917
-UCCA_MODEL[fr-gsd-dev]=ucca-fr-bilstm-20180917
-UCCA_MODEL[fr-gsd-test]=ucca-fr-bilstm-20180917
-UCCA_MODEL[20k-de-dev]=ucca-de-bilstm-20180917
-UCCA_MODEL[20k-de-test]=ucca-de-bilstm-20180917
-UCCA_MODEL[de-gsd-dev]=ucca-de-bilstm-20180917
-UCCA_MODEL[de-gsd-test]=ucca-de-bilstm-20180917
+UCCA_MODEL[ewt]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[ewt-dev]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[ewt-test]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[wiki-dev]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[wiki-test]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[20k]=ucca-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[20k-fr-dev]=ucca-fr-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[20k-fr-test]=ucca-fr-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[fr-gsd-dev]=ucca-fr-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[fr-gsd-test]=ucca-fr-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[20k-de-dev]=ucca-de-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[20k-de-test]=ucca-de-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[de-gsd-dev]=ucca-de-bilstm-spacy-20181122-gated-2
+UCCA_MODEL[de-gsd-test]=ucca-de-bilstm-spacy-20181122-gated-2
 
-UCCA_UD_MODEL[ewt]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[ewt-dev]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[ewt-test]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[wiki-dev]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[wiki-test]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[20k]=ucca-ud-bilstm-20180917
-UCCA_UD_MODEL[20k-fr-dev]=ucca-ud-fr-bilstm-20180917
-UCCA_UD_MODEL[20k-fr-test]=ucca-ud-fr-bilstm-20180917
-UCCA_UD_MODEL[fr-gsd-dev]=ucca-ud-fr-bilstm-20180917
-UCCA_UD_MODEL[fr-gsd-test]=ucca-ud-fr-bilstm-20180917
-UCCA_UD_MODEL[20k-de-dev]=ucca-ud-de-bilstm-20180917
-UCCA_UD_MODEL[20k-de-test]=ucca-ud-de-bilstm-20180917
-UCCA_UD_MODEL[de-gsd-dev]=ucca-ud-de-bilstm-20180917
-UCCA_UD_MODEL[de-gsd-test]=ucca-ud-de-bilstm-20180917
+UCCA_UD_MODEL[ewt]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[ewt-dev]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[ewt-test]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[wiki-dev]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[wiki-test]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[20k]=ucca-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[20k-fr-dev]=ucca-fr-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[20k-fr-test]=ucca-fr-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[fr-gsd-dev]=ucca-fr-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[fr-gsd-test]=ucca-fr-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[20k-de-dev]=ucca-de-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[20k-de-test]=ucca-de-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[de-gsd-dev]=ucca-de-bilstm-spacy-converted-ud-20181122-gated-2
+UCCA_UD_MODEL[de-gsd-test]=ucca-de-bilstm-spacy-converted-ud-20181122-gated-2
 
 UD_MODEL[ewt]=en_ewt-no-reviews-20181119
 UD_MODEL[ewt-dev]=en_ewt-20181119
