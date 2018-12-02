@@ -76,7 +76,6 @@ class Evaluator:
             if only_r:
                 for y in sorted(only_r, key=min):
                     print(image_link, ud_link, ref.ID[:-3], self.to_text(ref, y), sep="\t")
-
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
             for yields in gyields, ryields:
