@@ -74,7 +74,7 @@ class Report(namedtuple("Report", ("is_ref", "model", "features", "ref", "labele
         m = re.match(r"(.*-\d+)-(.*)", basename)
         path = f.split(os.sep)
         # noinspection PyTypeChecker
-        fields = (bool(m),) + (m.groups() if m else (basename, "")) + \
+        fields = (bool(m),) + (basename, "") + \
                  (path[-2], "unlabeled" not in f, "counts" in f, CORPORA[path[-3]], f)
         return Report(*fields)
 
