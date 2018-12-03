@@ -8,13 +8,13 @@ run() {
 }
 
 DATA[ewt]=../converted/UCCA_English-EWT
-DATA[wiki-dev]=../shared-task/data/dev-xml/UCCA_English-Wiki
-DATA[wiki-test]=../shared-task/data/test-xml-gold/UCCA_English-Wiki
-DATA[20k]=../shared-task/data/test-xml-gold/UCCA_English-20K
-DATA[20k-fr-dev]=../shared-task/data/dev-xml/UCCA_French-20K
-DATA[20k-fr-test]=../shared-task/data/test-xml-gold/UCCA_French-20K
-DATA[20k-de-dev]=../shared-task/data/dev-xml/UCCA_German-20K
-DATA[20k-de-test]=../shared-task/data/test-xml-gold/UCCA_German-20K
+DATA[wiki-dev]=../converted/UCCA_English-Wiki/dev
+DATA[wiki-test]=../converted/UCCA_English-Wiki/test
+DATA[20k]=../converted/UCCA_English-20K
+DATA[20k-fr-dev]=../converted/UCCA_French-20K/dev
+DATA[20k-fr-test]=../converted/UCCA_French-20K/test
+DATA[20k-de-dev]=../converted/UCCA_German-20K/dev
+DATA[20k-de-test]=../converted/UCCA_German-20K/test
 
 UCCA_MODEL[ewt]=ucca-bilstm-spacy-20181122  #-gated-2
 UCCA_MODEL[ewt-dev]=ucca-bilstm-spacy-20181122  #-gated-2
