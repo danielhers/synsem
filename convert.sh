@@ -26,7 +26,7 @@ for d in ${CORPORA[@]}; do
   else
     rm -fv $PARSED/conllu/ucca/$d.conllu
     echo ${DATA[$d]}
-    run python -m semstr.convert "${DATA[$d]}/*.xml" -o $PARSED/conllu/ucca -j $d -f conllu --label-map=$UCCA_UD_LABEL_MAP $*
+    run python -m semstr.convert "${DATA[$d]}/*.*" -o $PARSED/conllu/ucca -j $d -f conllu --label-map=$UCCA_UD_LABEL_MAP $*
     for MODEL in ${UCCA_UD_MODEL[$d]} ${UCCA_MODEL[$d]}; do  # Parsed UCCA to UD
       rm -fv $PARSED/conllu/$MODEL/$d.conllu
       run python -m semstr.convert "$PARSED/xml/$MODEL/$d/*.xml" -o $PARSED/conllu/$MODEL -j $d -f conllu --label-map=$UCCA_UD_LABEL_MAP $*
