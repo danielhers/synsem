@@ -3,6 +3,8 @@
 #SBATCH --time=0-1
 #SBATCH --array=0-13
 
+# Evaluate against gold UD data
+
 DIR=$PWD
 . models.sh
 echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID
@@ -23,7 +25,6 @@ for d in ${CORPORA[@]}; do
       if [[ -e $GUESSED ]]; then
         echo $GUESSED $REF
         if [[ -n "${DATA[$d]}" ]]; then
-          run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --unlabeled -s $OUT/ucca/$MODEL.unlabeled.ud.csv -c $OUT/ucca/$MODEL.unlabeled.ud.counts.csv -q --ref-yield-tags=${DATA[$d]} $*
           run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
         fi
         run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -c $OUT/ud/$MODEL.unlabeled.counts.csv -q $*

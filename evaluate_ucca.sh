@@ -3,6 +3,8 @@
 #SBATCH --time=0-1
 #SBATCH --array=0-13
 
+# Evaluate against gold UCCA data
+
 DIR=$PWD
 . models.sh
 echo SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID

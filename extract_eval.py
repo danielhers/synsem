@@ -29,7 +29,7 @@ COLUMNS = pd.Series(list(map("_".join, chain(
     product(["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["f1"])))))
 
 COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
-    ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["ref", "guessed", "matches"]))))
+    ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["unlabeled", "labeled"], ["ref", "guessed", "matches"]))))
 
 REF_COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
     ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["ref"]))))
@@ -64,8 +64,9 @@ class Data(namedtuple("Data", ("columns", "count_columns", "report", "scores", "
     def ref(self):  # UCCA/CoNLL-U, indicating the format of the reference
         try:
             column_name = (self.column_names() or self.counts_column_names())[0]
-        except IndexError as e:
-            raise ValueError("No relevant columns found in '%s'" % self.report.filename) from e
+        except IndexError:  # as e:
+            return None
+            # raise ValueError("No relevant columns found in '%s'" % self.report.filename) from e
         try:
             return column_name.partition("_")[0]  # e.g. UCCA_primary_labeled_precision -> UCCA
         except IndexError as e:
@@ -76,11 +77,10 @@ class Report(namedtuple("Report", ("is_ref", "model", "features", "ref", "labele
     @staticmethod
     def create(f):
         basename = os.path.basename(re.match(r"(.*?)\.[a-z.]+", f).group(1))
-        m = re.match(r"(.*-\d+)-(.*)", basename)
         path = f.split(os.sep)
         # noinspection PyTypeChecker
-        fields = (bool(m),) + (basename, "") + \
-                 (path[-2], "unlabeled" not in f, "counts" in f, CORPORA[path[-3]], f)
+        fields = (not re.search(r"\d", os.path.basename(f)), basename, "", path[-2],
+                  "unlabeled" not in f, "counts" in f, CORPORA[path[-3]], f)
         return Report(*fields)
 
     def read(self):
@@ -138,6 +138,7 @@ def eval_model_features(model_features, data):
 
 
 def combine(data, attr="scores"):
+    data = list(data)
     df = getattr(data[0], attr)
     for data in data[1:]:
         df = df.combine_first(getattr(data, attr))
@@ -145,7 +146,7 @@ def combine(data, attr="scores"):
 
 
 def strip(c):
-    for s in "UCCA_", "CoNLL-U_", "_labeled", "_f1", "_ref":
+    for s in "UCCA_", "CoNLL-U_", "_labeled", "_unlabeled", "_f1", "_ref", "_guessed", "_matches":
         c = c.replace(s, "")
     return c
 
