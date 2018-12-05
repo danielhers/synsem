@@ -5,13 +5,13 @@ import pandas as pd
 from glob import glob
 from operator import attrgetter
 
-from extract_eval import UCCA_RELS, UD_RELS, REF_COUNTS_COLUMNS, Data, Report, strip, combine
+from extract_eval import UCCA_RELS, ALL_UD_RELS, REF_COUNTS_COLUMNS, Data, Report, strip, combine
 
 PRED_COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
-    ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["guessed"]))))
+    ["UCCA", "CoNLL-U"], UCCA_RELS + ALL_UD_RELS, ["labeled"], ["guessed"]))))
 
 MATCHES_COUNTS_COLUMNS = pd.Series(list(map("_".join, product(
-    ["UCCA", "CoNLL-U"], UCCA_RELS + UD_RELS, ["labeled"], ["matches"]))))
+    ["UCCA", "CoNLL-U"], UCCA_RELS + ALL_UD_RELS, ["labeled"], ["matches"]))))
 
 
 def eval_corpus(corpus, reports):

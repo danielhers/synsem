@@ -18,8 +18,11 @@ UCCA_RELS = split("A	C	D	E	F	G	H	L	N	P	R	S	U")
 ALL_UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	csubj"
                     "	dep	det	discourse	expl	fixed	flat	goeswith	head	iobj	list	mark	nmod"
                     "	nsubj	nummod	obj	obl	orphan	parataxis	punct	root	vocative	xcomp")
-UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	det"
-                "	expl	iobj	mark	nmod	nsubj	nummod	obj	obl	parataxis	xcomp")
+# UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	det"
+#                 "	iobj	mark	nmod	nsubj	nummod	obj	obl	parataxis	xcomp")
+UD_RELS = split("acl	advcl	advmod	amod	appos	aux	case	cc	ccomp	compound	conj	cop	csubj"
+                "	det	discourse	expl	iobj	list	mark	nmod"
+                "	nsubj	nummod	obj	obl	parataxis	vocative	xcomp")
 
 COLUMNS = pd.Series(list(map("_".join, chain(
     product(["UCCA", "CoNLL-U"], ["primary", "remote"], ["unlabeled", "labeled"], ["precision", "recall", "f1"]),
@@ -111,7 +114,8 @@ def eval_ref(ref, data, columns=None):
     counts["zero"] = 0
     ccs = [count_columns[c] for c in columns]
     ccs = [c if c in counts.columns.tolist() else "zero" for c in ccs]
-    print(*([ref] + 14 * [""] + [counts[ccs].to_csv(header=False, index=False, sep="\t")]), sep="\t", end="")
+    print(*([ref, "#matched in gold"] + 13 * [""] + [counts[ccs].to_csv(header=False, index=False, sep="\t")]),
+          sep="\t", end="")
     for tup in groupby(data, key=key):
         eval_model_features(*tup)
 
