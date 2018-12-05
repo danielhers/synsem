@@ -22,10 +22,11 @@ for d in ${CORPORA[@]}; do
       [[ -d $GUESSED ]] || GUESSED=$GUESSED.conllu
       if [[ -e $GUESSED ]]; then
         echo $GUESSED $REF
-        run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -q $*
         if [[ -n "${DATA[$d]}" ]]; then
+          run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --unlabeled -s $OUT/ucca/$MODEL.unlabeled.ud.csv -c $OUT/ucca/$MODEL.unlabeled.ud.counts.csv -q --ref-yield-tags=${DATA[$d]} $*
           run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --constructions=categories -s $OUT/ucca/$MODEL.ud.csv -c $OUT/ucca/$MODEL.ud.counts.csv -o $OUT/all/ucca/$MODEL.ud.csv -q --ref-yield-tags=${DATA[$d]} $*
         fi
+        run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --unlabeled -s $OUT/ud/$MODEL.unlabeled.csv -c $OUT/ud/$MODEL.unlabeled.counts.csv -q $*
         run python -m semstr.evaluate --no-enhanced --no-normalize $GUESSED $REF --constructions=categories -s $OUT/ud/$MODEL.ud.csv -c $OUT/ud/$MODEL.ud.counts.csv -o $OUT/all/ud/$MODEL.ud.csv -q $*
       else
         echo $GUESSED not found, cannot evaluate $MODEL
