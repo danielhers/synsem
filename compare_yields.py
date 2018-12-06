@@ -57,15 +57,7 @@ class Evaluator:
         return " ".join(p.by_id("0.%d" % i).text for i in sorted(y))
 
     def evaluate(self, guessed: Passage, ref: Passage):
-        assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
-        gyields, ryields = [list(self.get_yields(p)) for p in (guessed, ref)]
-        punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for t in y if t.punct}
-        gtags, rtags = [self.join_tags(yields, punct_positions) for yields in (gyields, ryields)]
-        g, r = list(map(set, (gtags, rtags)))
-        common = g & r
-        only_g = g - common
-        only_r = r - common
-        stat = SummaryStatistics(len(common), len(only_g), len(only_r))
+        g, gtags, gyields, only_r, r, rtags, ryields, stat = self.evaluate_yields(guessed, ref)
         image_link = IMAGE_LINK_FORMAT % ref.ID
         ud_link = UD_LINK_FORMAT % ref.ID
         if self.all_yields:
@@ -84,11 +76,22 @@ class Evaluator:
             print()
         return stat
 
+    def evaluate_yields(self, guessed, ref):
+        assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
+        gyields, ryields = [list(self.get_yields(p)) for p in (guessed, ref)]
+        punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for t in y if t.punct}
+        gtags, rtags = [self.join_tags(yields, punct_positions) for yields in (gyields, ryields)]
+        g, r = list(map(set, (gtags, rtags)))
+        common = g & r
+        only_g = g - common
+        only_r = r - common
+        stat = SummaryStatistics(len(common), len(only_g), len(only_r))
+        return g, gtags, gyields, only_r, r, rtags, ryields, stat
+
     def run(self, guessed: List[str], ref: List[str], **kwargs):
         del kwargs
         guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (guessed, ref)]
-        stats = SummaryStatistics.aggregate([self.evaluate(g, r)
-                                             for g, r in zip(guessed, ref)])
+        stats = SummaryStatistics.aggregate([self.evaluate(g, r) for g, r in zip(guessed, ref)])
         stats.print()
 
     @staticmethod
