@@ -21,7 +21,7 @@ for d in ${CORPORA[@]}; do
   else
     echo $data
     run python -m semstr.scripts.udpipe $data -u ../udpipe/models/${UDPIPE_MODEL[$d]} -o $PARSED/conllu/${UDPIPE_MODEL[$d]} -j $d.tmp $*
-    run ../udpipe/udpipe-ud-2.3-181115/udpipe --tag --parse  ../udpipe/udpipe-ud-2.3-181115/english-ewt-ud-2.3-181115.udpipe < $PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.tmp.conllu > $PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.conllu
+    run ../udpipe/udpipe-ud-2.3-181115/udpipe --tag --parse  ../udpipe/udpipe-ud-2.3-181115/${UDPIPE_MODEL[$d]} < $PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.tmp.conllu > $PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.conllu
     rm -f $PARSED/conllu/${UDPIPE_MODEL[$d]}/$d.tmp.conllu
   fi
 done
