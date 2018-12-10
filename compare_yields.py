@@ -12,8 +12,6 @@ from ucca.ioutil import get_passages
 IMAGE_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-images/%s.svg"
 UD_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-ud/%s.conllu"
 
-FROM_FORMAT["conllu"] = partial(FROM_FORMAT["conllu"], dep=True, enhanced=False)
-
 
 class Evaluator:
     def __init__(self, relations: Tuple[str] = None, errors: bool = False, all_yields: bool = False, **kwargs):
@@ -79,7 +77,8 @@ class Evaluator:
     def evaluate_yields(self, guessed, ref):
         assert guessed.ID == ref.ID, "Inconsistent order of passages: %s != %s" % (guessed.ID, ref.ID)
         gyields, ryields = [list(self.get_yields(p)) for p in (guessed, ref)]
-        punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for t in y if t.punct}
+        punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for p in (guessed, ref)
+                           for t in y if self.is_excluded(p.layer(layer0.LAYER_ID).by_position(t.position))}
         gtags, rtags = [self.join_tags(yields, punct_positions) for yields in (gyields, ryields)]
         g, r = list(map(set, (gtags, rtags)))
         common = g & r
@@ -88,9 +87,17 @@ class Evaluator:
         stat = SummaryStatistics(len(common), len(only_g), len(only_r))
         return g, gtags, gyields, only_r, r, rtags, ryields, stat
 
+    def is_excluded(self, terminal):
+        return terminal.punct
+
+    def converters(self):
+        from_format = dict(FROM_FORMAT)
+        from_format["conllu"] = partial(from_format["conllu"], dep=True, enhanced=False)
+        return from_format
+
     def run(self, guessed: List[str], ref: List[str], **kwargs):
         del kwargs
-        guessed, ref = [get_passages(f, converters=FROM_FORMAT) for f in (guessed, ref)]
+        guessed, ref = [get_passages(f, converters=self.converters()) for f in (guessed, ref)]
         stats = SummaryStatistics.aggregate([self.evaluate(g, r) for g, r in zip(guessed, ref)])
         stats.print()
 
