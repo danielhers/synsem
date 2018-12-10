@@ -30,12 +30,16 @@ class Evaluator:
             terminals.append(unit)  # UD: all nodes; UCCA: only terminals
         return terminals
 
-    def get_yields(self, passage: Passage):
+    def get_units(self, passage: Passage):
         for unit in passage.layer(layer1.LAYER_ID).all:
             for edge in unit:
                 if (self.relations is None or edge.tag in self.relations) and edge.tag != layer1.EdgeTags.Terminal \
                         and not edge.attrib.get("remote") and not edge.child.attrib.get("implicit"):
-                    yield self.get_terminals(edge.child), edge.tag
+                    yield edge.child, edge.tag
+
+    def get_yields(self, passage: Passage):
+        for unit, tag in self.get_units(passage):
+            yield self.get_terminals(unit), tag
 
     @staticmethod
     def join_tags(yields, punct_positions):
