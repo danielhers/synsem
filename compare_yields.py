@@ -80,12 +80,16 @@ class Evaluator:
         punct_positions = {t.position for yields in (gyields, ryields) for y, _ in yields for p in (guessed, ref)
                            for t in y if self.is_excluded(p.layer(layer0.LAYER_ID).by_position(t.position))}
         gtags, rtags = [self.join_tags(yields, punct_positions) for yields in (gyields, ryields)]
+        g, only_r, r, stat = self.evaluate_tags(gtags, rtags)
+        return g, gtags, gyields, only_r, r, rtags, ryields, stat
+
+    def evaluate_tags(self, gtags, rtags):
         g, r = list(map(set, (gtags, rtags)))
         common = g & r
         only_g = g - common
         only_r = r - common
         stat = SummaryStatistics(len(common), len(only_g), len(only_r))
-        return g, gtags, gyields, only_r, r, rtags, ryields, stat
+        return g, only_r, r, stat
 
     def is_excluded(self, terminal):
         return terminal.punct
