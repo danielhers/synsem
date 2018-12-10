@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #set +x
 
 declare -A DATA UCCA_MODEL UCCA_UD_MODEL UD_MODEL UDPIPE_MODEL UD_DATA
