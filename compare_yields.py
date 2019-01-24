@@ -1,16 +1,13 @@
 from argparse import ArgumentParser
 from functools import partial
 from operator import attrgetter
-
 from semstr.convert import FROM_FORMAT
+from tqdm import tqdm
 from typing import Set, Tuple, List
 from ucca import layer0, layer1
 from ucca.core import Node, Passage, Edge
 from ucca.evaluation import SummaryStatistics
 from ucca.ioutil import get_passages
-
-IMAGE_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-images/%s.svg"
-UD_LINK_FORMAT = "https://github.com/danielhers/UCCA_English-EWT/blob/v1-guidelines-ud/%s.conllu"
 
 
 class Evaluator:
@@ -60,16 +57,14 @@ class Evaluator:
 
     def evaluate(self, guessed: Passage, ref: Passage):
         g, gtags, gyields, only_r, r, rtags, ryields, stat = self.evaluate_yields(guessed, ref)
-        image_link = IMAGE_LINK_FORMAT % ref.ID
-        ud_link = UD_LINK_FORMAT % ref.ID
         if self.all_yields:
             for y in sorted(g | r, key=min):
-                print(image_link, ud_link, self.get_tags(gtags, y), self.get_tags(rtags, y), ref.ID[:-3],
+                print(self.get_tags(gtags, y), self.get_tags(rtags, y), ref.ID[:-3],
                       self.to_text(ref, y), sep="\t")
         elif self.errors:
             if only_r:
                 for y in sorted(only_r, key=min):
-                    print(image_link, ud_link, ref.ID[:-3], self.to_text(ref, y), sep="\t")
+                    print(ref.ID[:-3], self.to_text(ref, y), sep="\t")
         elif g or r:
             print(guessed.ID, "F1 = %.3f" % stat.f1, sep="\t")
             for yields in gyields, ryields:
@@ -105,8 +100,8 @@ class Evaluator:
 
     def run(self, guessed: List[str], ref: List[str], **kwargs):
         del kwargs
-        guessed, ref = [get_passages(f, converters=self.converters()) for f in (guessed, ref)]
-        stats = SummaryStatistics.aggregate([self.evaluate(g, r) for g, r in zip(guessed, ref)])
+        guessed, ref = [{p.ID: p for p in tqdm(get_passages(f, converters=self.converters()))} for f in (guessed, ref)]
+        stats = SummaryStatistics.aggregate([self.evaluate(g, ref[i]) for i, g in sorted(guessed.items()) if i in ref])
         stats.print()
 
     @staticmethod
