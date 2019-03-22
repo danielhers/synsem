@@ -1,4 +1,4 @@
-ucca==1.1.7
+ucca==1.2.0
 semstr==1.1.10
 spacy==2.1.1
 pandas
