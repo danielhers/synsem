@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 pip install -U semstr udapi
+python -m spacy download en_core_web_md
 mkdir -p data/ucca-train-dev
 cd data
 [[ -d sentences ]] || git clone https://github.com/UniversalConceptualCognitiveAnnotation/UCCA_English-EWT --branch=v1.0-sentences sentences
