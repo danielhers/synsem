@@ -12,4 +12,4 @@ chmod +x split.sh
 cp -L sentences/{train,dev}/* ucca-train-dev
 python -m semstr.scripts.annotate ud/train -o ud-train-dev -c ud/train -a -l en || exit 1
 python -m semstr.scripts.annotate ud/dev -o ud-train-dev -c ud/dev -a -l en || exit 1
-python -m scripts.evaluate_standard ud-train-dev ucca-train-dev --errors --as-table
+python -m scripts.evaluate_standard ud-train-dev ucca-train-dev --errors --as-table --no-normalize --errors-file confusion_matrix.csv
